@@ -1,0 +1,24 @@
+language: python
+
+virtualenv:
+  system_site_packages: true
+
+sudo: required
+
+services:
+  - docker
+
+env: PLUGIN=upload2
+
+before_install:
+  - git clone --recurse-submodules git://github.com/openmicroscopy/omero-test-infra .omero
+
+script:
+  - .omero/cli-docker
+
+deploy:
+  provider: pypi
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
+  on:
+    tags: true
