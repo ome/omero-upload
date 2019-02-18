@@ -12,4 +12,4 @@
 """
 
 from omero_cli_upload import UploadControl, HELP
-register("upload2", UploadControl, HELP) # noqa
+register("upload", UploadControl, HELP) # noqa
