@@ -8,8 +8,6 @@ sudo: required
 services:
   - docker
 
-env: PLUGIN=upload2
-
 before_install:
   - git clone --recurse-submodules git://github.com/openmicroscopy/omero-test-infra .omero
 
