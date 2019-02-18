@@ -1,13 +1,13 @@
-.. image:: https://travis-ci.org/ome/omero-cli-render.svg?branch=master
-    :target: https://travis-ci.org/ome/omero-cli-render
+.. image:: https://travis-ci.org/ome/omero-cli-upload.svg?branch=master
+    :target: https://travis-ci.org/ome/omero-cli-upload
 
-.. image:: https://badge.fury.io/py/omero-cli-render.svg
-    :target: https://badge.fury.io/py/omero-cli-render
+.. image:: https://badge.fury.io/py/omero-cli-upload.svg
+    :target: https://badge.fury.io/py/omero-cli-upload
 
 OMERO CLI upload
 ================
 
-Plugin for use in the OMERO CLI.
+Plugin for uploading files using the OMERO Command Line Interface (CLI).
 
 Requirements
 ============
@@ -20,9 +20,7 @@ Installing from PyPI
 
 This section assumes that an OMERO.py is already installed.
 
-Install the command-line tool using `pip <https://pip.pypa.io/en/stable/>`_:
-
-::
+Install the command-line tool using `pip <https://pip.pypa.io/en/stable/>`_::
 
     $ pip install -U omero-cli-upload
 
