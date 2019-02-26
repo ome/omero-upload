@@ -22,7 +22,7 @@
 import os
 
 from omero.testlib import ITest
-from omero.upload import upload_ln_s
+from omero_upload import upload_ln_s
 from omero.util.temp_files import create_path
 from omero.util import long_to_path
 
@@ -38,10 +38,11 @@ class TestLibUpload(ITest):
         f.write_text(txt)
         ofile = upload_ln_s(self.client, f, omero_data_dir, 'text/plain')
         assert ofile.getHash() == 'f572d396fae9206628714fb2ce00f72e94f2258f'
-        assert ofile.getSize() == 5
+        assert ofile.getSize() == 6
         with ofile.asFileObj() as fo:
             assert fo.read() == txt
 
-        omero_path = os.path.join(omero_data_dir, 'Files', long_to_path(fo.id))
+        omero_path = os.path.join(
+            omero_data_dir, 'Files', long_to_path(ofile.id))
         assert os.path.islink(omero_path)
         assert os.readlink(omero_path) == str(f)
