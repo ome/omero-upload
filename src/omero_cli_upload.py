@@ -25,12 +25,6 @@ import mimetypes
 
 from omero.cli import BaseControl
 
-try:
-    import hashlib
-    hash_sha1 = hashlib.sha1
-except Exception:
-    import sha
-    hash_sha1 = sha.new
 
 HELP = """Upload local files to the OMERO server"""
 RE = re.compile(r"\s*upload\s*")
