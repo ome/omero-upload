@@ -40,19 +40,19 @@ class TestUpload(CLITest):
         self.cli.invoke(self.args, strict=True)
         return capfd.readouterr()[0]
 
-    def check_file_name(self, originalFile, filename):
-        args = self.login_args() + ["obj", "get", originalFile]
+    def check_file_name(self, original_file, filename):
+        args = self.login_args() + ["obj", "get", original_file]
         self.cli.invoke(args + ["name"], strict=True)
         name = self.cli.get("tx.state").get_row(0)
         assert filename.name == name
 
-    def testUploadSingleFile(self, capfd):
+    def test_upload_single_file(self, capfd):
         f = create_path(suffix=".txt")
         self.args += [str(f)]
         out = self.upload(capfd)
         self.check_file_name(out, f)
 
-    def testUploadMultipleFiles(self, capfd):
+    def test_upload_multiple_files(self, capfd):
         f1 = create_path(suffix=".txt")
         f2 = create_path(suffix=".txt")
         self.args += [str(f1), str(f2)]
@@ -61,7 +61,7 @@ class TestUpload(CLITest):
         self.check_file_name("OriginalFile:%s" % ids[0], f1)
         self.check_file_name("OriginalFile:%s" % ids[1], f2)
 
-    def testUploadBadFile(self, capfd):
+    def test_upload_bad_file(self, capfd):
         f1 = create_path(suffix=".txt")
         f2 = self.uuid() + ""
         self.args += [str(f1), str(f2)]
