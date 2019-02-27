@@ -1,8 +1,8 @@
-.. image:: https://travis-ci.org/ome/omero-cli-upload.svg?branch=master
-    :target: https://travis-ci.org/ome/omero-cli-upload
+.. image:: https://travis-ci.org/ome/omero-upload.svg?branch=master
+    :target: https://travis-ci.org/ome/omero-upload
 
-.. image:: https://badge.fury.io/py/omero-cli-upload.svg
-    :target: https://badge.fury.io/py/omero-cli-upload
+.. image:: https://badge.fury.io/py/omero-upload.svg
+    :target: https://badge.fury.io/py/omero-upload
 
 OMERO CLI upload
 ================
@@ -22,7 +22,7 @@ This section assumes that an OMERO.py is already installed.
 
 Install the command-line tool using `pip <https://pip.pypa.io/en/stable/>`_::
 
-    $ pip install -U omero-cli-upload
+    $ pip install -U omero-upload
 
 License
 -------

@@ -91,15 +91,15 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-version = '0.1.0.dev1'
-url = "https://github.com/ome/omero-cli-upload/"
+version = '0.1.0'
+url = "https://github.com/ome/omero-upload/"
 
 setup(
     version=version,
     packages=['', 'omero.plugins'],
     package_dir={"": "src"},
-    name='omero-cli-upload',
-    description="Upload plugin for use in the OMERO CLI.",
+    name='omero-upload',
+    description="Upload library for use in the OMERO CLI.",
     long_description=read('README.rst'),
     long_description_content_type='text/x-rst',
     classifiers=[
