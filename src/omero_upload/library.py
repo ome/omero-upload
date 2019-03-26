@@ -56,7 +56,15 @@ def upload_ln_s(client, filepath, omero_data_dir, mimetype=None):
         omero_data_dir, 'Files', omero.util.long_to_path(fo.id))
 
     log.debug('OriginalFile:%d Deleting %s', fo.id, omero_path)
-    os.remove(omero_path)
+    try:
+        os.remove(omero_path)
+    except OSError:
+        log.error(
+            'Unable to delete, do you have direct access to the OMERO '
+            'filesystem? %s', omero_path)
+        log.debug('Attempting to clean up OriginalFile:%d', fo.id)
+        conn.deleteObject(fo._obj)
+        raise
 
     log.debug('OriginalFile:%d Symlinking %s to %s',
               fo.id, abspath, omero_path)

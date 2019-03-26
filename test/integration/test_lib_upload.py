@@ -19,6 +19,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pytest
 import os
 
 from omero.testlib import ITest
@@ -46,3 +47,11 @@ class TestLibUpload(ITest):
             omero_data_dir, 'Files', long_to_path(ofile.id))
         assert os.path.islink(omero_path)
         assert os.readlink(omero_path) == str(f)
+
+    def test_upload_ln_s_no_access(self):
+        txt = 'hello\n'
+        omero_data_dir = '/tmp'
+        f = create_path(suffix=".txt")
+        f.write_text(txt)
+        with pytest.raises(OSError):
+            upload_ln_s(self.client, f, omero_data_dir, 'text/plain')
