@@ -21,12 +21,52 @@ from hashlib import sha1
 import logging
 import os
 from StringIO import StringIO
+from uuid import uuid4
 import omero.clients
 from omero.gateway import BlitzGateway
 
 log = logging.getLogger(__name__)
 
 bufsize = 1048576
+
+
+def _create_and_check_location(conn, omero_data_dir, abspath, mimetype):
+    log.debug('Creating OriginalFile placeholder')
+    filedir = os.path.dirname(abspath)
+    filename = os.path.basename(abspath)
+    placeholder = str(uuid4())
+    fo = conn.createOriginalFileFromFileObj(
+        StringIO(placeholder), filedir, filename, len(placeholder),
+        mimetype=mimetype)
+    omero_path = os.path.join(
+        omero_data_dir, 'Files', omero.util.long_to_path(fo.id))
+
+    try:
+        with open(omero_path) as f:
+            check = f.read()
+    except IOError:
+        check = ''
+    if check != placeholder:
+        log.error(
+            'Content check failed, are you on the correct server? '
+            'OriginalFile:%d %s', fo.id, omero_path)
+        log.debug('Attempting to clean up OriginalFile:%d', fo.id)
+        conn.deleteObject(fo._obj)
+        raise omero.ApiUsageException(message=(
+            'Content check failed OriginalFile:%d %s' % (fo.id, omero_path)))
+
+    log.debug('OriginalFile:%d Deleting %s', fo.id, omero_path)
+    try:
+        os.remove(omero_path)
+    except OSError:
+        log.error(
+            'Unable to delete file, do you have direct access to the OMERO '
+            'filesystem? %s', omero_path)
+        log.debug('Attempting to clean up OriginalFile:%d', fo.id)
+        conn.deleteObject(fo._obj)
+        raise
+
+    return fo, omero_path
 
 
 def upload_ln_s(client, filepath, omero_data_dir, mimetype=None):
@@ -43,28 +83,9 @@ def upload_ln_s(client, filepath, omero_data_dir, mimetype=None):
     :return: The wrapped OriginalFile for the symlinked file
     """
     abspath = os.path.abspath(filepath)
-    filedir = os.path.dirname(abspath)
-    filename = os.path.basename(abspath)
-
     conn = BlitzGateway(client_obj=client)
-
-    log.debug('Creating empty OriginalFile placeholder')
-    placeholder = StringIO('')
-    fo = conn.createOriginalFileFromFileObj(
-        placeholder, filedir, filename, 0, mimetype=mimetype)
-    omero_path = os.path.join(
-        omero_data_dir, 'Files', omero.util.long_to_path(fo.id))
-
-    log.debug('OriginalFile:%d Deleting %s', fo.id, omero_path)
-    try:
-        os.remove(omero_path)
-    except OSError:
-        log.error(
-            'Unable to delete, do you have direct access to the OMERO '
-            'filesystem? %s', omero_path)
-        log.debug('Attempting to clean up OriginalFile:%d', fo.id)
-        conn.deleteObject(fo._obj)
-        raise
+    fo, omero_path = _create_and_check_location(
+        conn, omero_data_dir, abspath, mimetype)
 
     log.debug('OriginalFile:%d Symlinking %s to %s',
               fo.id, abspath, omero_path)

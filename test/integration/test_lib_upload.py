@@ -22,6 +22,7 @@
 import pytest
 import os
 
+import omero
 from omero.testlib import ITest
 from omero_upload import upload_ln_s
 from omero.util.temp_files import create_path
@@ -53,5 +54,5 @@ class TestLibUpload(ITest):
         omero_data_dir = '/tmp'
         f = create_path(suffix=".txt")
         f.write_text(txt)
-        with pytest.raises(OSError):
+        with pytest.raises(omero.ApiUsageException):
             upload_ln_s(self.client, f, omero_data_dir, 'text/plain')
