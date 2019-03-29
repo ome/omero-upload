@@ -96,7 +96,11 @@ url = "https://github.com/ome/omero-upload/"
 
 setup(
     version=version,
-    packages=['', 'omero.plugins'],
+    packages=[
+        '',
+        'omero.plugins',
+        'omero_upload',
+    ],
     package_dir={"": "src"},
     name='omero-upload',
     description="Upload library for use in the OMERO CLI.",
