@@ -11,5 +11,5 @@
 
 """
 
-from omero_cli_upload import UploadControl, HELP
+from omero_upload.cli import UploadControl, HELP
 register("upload", UploadControl, HELP) # noqa
