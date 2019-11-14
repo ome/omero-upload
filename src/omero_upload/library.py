@@ -17,10 +17,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from future import standard_library
+standard_library.install_aliases() # noqa
+from builtins import str
 from hashlib import sha1
 import logging
 import os
-from StringIO import StringIO
+from io import StringIO
 from uuid import uuid4
 import omero.clients
 from omero.gateway import BlitzGateway
