@@ -23,7 +23,7 @@ from builtins import str
 from hashlib import sha1
 import logging
 import os
-from io import StringIO
+from io import BytesIO
 from uuid import uuid4
 import omero.clients
 from omero.gateway import BlitzGateway
@@ -39,8 +39,8 @@ def _create_and_check_location(conn, omero_data_dir, abspath, mimetype):
     filename = os.path.basename(abspath)
     placeholder = str(uuid4())
     fo = conn.createOriginalFileFromFileObj(
-        StringIO(placeholder), filedir, filename, len(placeholder),
-        mimetype=mimetype)
+        BytesIO(placeholder.encode("utf-8")), filedir, filename,
+        len(placeholder), mimetype=mimetype)
     omero_path = os.path.join(
         omero_data_dir, 'Files', omero.util.long_to_path(fo.id))
 
@@ -53,6 +53,7 @@ def _create_and_check_location(conn, omero_data_dir, abspath, mimetype):
         log.error(
             'Content check failed, are you on the correct server? '
             'OriginalFile:%d %s', fo.id, omero_path)
+        log.error('%s %s', check, placeholder)
         log.debug('Attempting to clean up OriginalFile:%d', fo.id)
         conn.deleteObject(fo._obj)
         raise omero.ApiUsageException(message=(
@@ -97,7 +98,7 @@ def upload_ln_s(client, filepath, omero_data_dir, mimetype=None):
     log.debug('OriginalFile:%d Getting size and checksum', fo.id)
     size = os.path.getsize(abspath)
     h = sha1()
-    with open(abspath) as f:
+    with open(abspath, 'rb') as f:
         while True:
             data = f.read(bufsize)
             if not data:

@@ -43,7 +43,7 @@ class TestLibUpload(ITest):
         assert ofile.getHash() == 'f572d396fae9206628714fb2ce00f72e94f2258f'
         assert ofile.getSize() == 6
         with ofile.asFileObj() as fo:
-            assert fo.read() == txt
+            assert fo.read().decode('utf-8') == txt
 
         omero_path = os.path.join(
             omero_data_dir, 'Files', long_to_path(ofile.id))
