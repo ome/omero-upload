@@ -91,7 +91,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-version = '0.2.1.dev'
+version = '0.3.dev1'
 url = "https://github.com/ome/omero-upload/"
 
 setup(
@@ -127,5 +127,10 @@ setup(
     download_url='%s/v%s.tar.gz' % (url, version),
     keywords=['OMERO.CLI', 'plugin'],
     cmdclass={'test': PyTest},
-    tests_require=['pytest'],
+    install_requires=[
+        'omero-py>=5.6.dev4',
+        'future'],
+    tests_require=[
+        'pytest',
+        'mox3'],
 )

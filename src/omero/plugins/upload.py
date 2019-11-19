@@ -11,5 +11,15 @@
 
 """
 
+
+import sys
+from omero.cli import CLI
 from omero_upload.cli import UploadControl, HELP
-register("upload", UploadControl, HELP) # noqa
+
+try:
+    register("upload", UploadControl, HELP) # noqa
+except NameError:
+    if __name__ == "__main__":
+        cli = CLI()
+        cli.register("upload", UploadControl, HELP)
+        cli.invoke(sys.argv[1:])
