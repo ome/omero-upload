@@ -20,10 +20,15 @@
 #
 
 import re
-import path
 import mimetypes
 
 from omero.cli import BaseControl
+
+try:
+    from omero_ext.path import path
+except ImportError:
+    # Python 2
+    from path import path
 
 
 HELP = """Upload local files to the OMERO server"""
@@ -53,7 +58,7 @@ class UploadControl(BaseControl):
         client = self.ctx.conn(args)
         obj_ids = []
         for file in args.file:
-            if not path.path(file).exists():
+            if not path(file).exists():
                 self.ctx.die(500, "File: %s does not exist" % file)
         for file in args.file:
             omero_format = UNKNOWN
