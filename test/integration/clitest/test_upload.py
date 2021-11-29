@@ -47,6 +47,12 @@ class TestUpload(CLITest):
         name = self.cli.get("tx.state").get_row(0)
         assert filename.name == name
 
+    def check_mimetype(self, original_file, expected_mimetype):
+        args = self.login_args() + ["obj", "get", original_file]
+        self.cli.invoke(args + ["mimetype"], strict=True)
+        mimetype = self.cli.get("tx.state").get_row(0)
+        assert mimetype == expected_mimetype
+
     def test_upload_single_file(self, capfd):
         f = create_path(suffix=".txt")
         self.args += [str(f)]
@@ -68,3 +74,10 @@ class TestUpload(CLITest):
         self.args += [str(f1), str(f2)]
         with pytest.raises(NonZeroReturnCode):
             self.upload(capfd)
+
+    def test_guessed_mimetype(self, capfd):
+        f = create_path(suffix=".txt")
+        self.args += [str(f)]
+        out = self.upload(capfd)
+        self.check_file_name(out, f)
+        self.check_mimetype(out, "text/plain")
