@@ -20,6 +20,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from builtins import str
+import os.path
 import pytest
 
 from omero.testlib.cli import CLITest
@@ -27,6 +28,7 @@ from omero.cli import NonZeroReturnCode
 from omero.plugins.obj import ObjControl
 from omero.plugins.upload import UploadControl
 from omero.util.temp_files import create_path
+from omero.util import long_to_path
 
 
 class TestUpload(CLITest):
@@ -53,16 +55,28 @@ class TestUpload(CLITest):
         mimetype = self.cli.get("tx.state").get_row(0)
         assert mimetype == expected_mimetype
 
+    def check_file_path(self, original_file, is_link):
+        file_id = int(original_file.split(":")[1])
+        omero_path = os.path.join("/OMERO", 'Files', long_to_path(file_id))
+        assert os.path.exists(omero_path)
+        if is_link:
+            assert os.path.islink(omero_path)
+        else:
+            assert not os.path.islink(omero_path)
+
     def test_upload_single_file(self, capfd):
         f = create_path(suffix=".txt")
         self.args += [str(f)]
         out = self.upload(capfd)
         self.check_file_name(out, f)
 
-    def test_upload_multiple_files(self, capfd):
+    @pytest.mark.parametrize('ln_s', [True, False])
+    def test_upload_multiple_files(self, capfd, ln_s):
         f1 = create_path(suffix=".txt")
         f2 = create_path(suffix=".txt")
         self.args += [str(f1), str(f2)]
+        if ln_s:
+            self.args += ["--data-dir", "/OMERO"]
         out = self.upload(capfd)
         ids = out.split(":")[1].split(",")
         self.check_file_name("OriginalFile:%s" % ids[0], f1)
@@ -82,9 +96,16 @@ class TestUpload(CLITest):
         self.check_file_name(out, f)
         self.check_mimetype(out, "text/plain")
 
-    def test_mimetype_argument(self, capfd):
+    @pytest.mark.parametrize('ln_s', [True, False])
+    def test_mimetype_argument(self, capfd, ln_s):
         f = create_path(suffix=".txt")
         self.args += [str(f), "--mimetype", "text/csv"]
+        if ln_s:
+            self.args += ["--data-dir", "/OMERO"]
         out = self.upload(capfd)
         self.check_file_name(out, f)
         self.check_mimetype(out, "text/csv")
+        if ln_s:
+            self.check_file_path(out, True)
+        else:
+            self.check_file_path(out, False)

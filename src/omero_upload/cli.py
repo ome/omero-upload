@@ -23,6 +23,7 @@ import re
 import mimetypes
 
 from omero.cli import BaseControl
+from .library import upload_ln_s
 
 try:
     from omero_ext.path import path
@@ -53,6 +54,10 @@ class UploadControl(BaseControl):
         parser.add_argument("file", nargs="+")
         parser.add_argument(
             "-m", "--mimetype", help="Mimetype of the file")
+        parser.add_argument(
+            "--data-dir", type=str,
+            help="Path to the OMERO data directory. If passed will try to"
+            "in-place upload into ManagedRepository")
         parser.set_defaults(func=self.upload)
         parser.add_login_arguments()
 
@@ -68,9 +73,15 @@ class UploadControl(BaseControl):
                 omero_format = args.mimetype
             elif (mimetypes.guess_type(file) != (None, None)):
                 omero_format = mimetypes.guess_type(file)[0]
-            obj = client.upload(local_file, type=omero_format)
-            obj_ids.append(obj.id.val)
-            self.ctx.set("last.upload.id", obj.id.val)
+            if args.data_dir:
+                obj = upload_ln_s(
+                    client, local_file, args.data_dir, omero_format)
+                obj_id = obj.id
+            else:
+                obj = client.upload(local_file, type=omero_format)
+                obj_id = obj.id.val
+            obj_ids.append(obj_id)
+            self.ctx.set("last.upload.id", obj_id)
 
         obj_ids = self._order_and_range_ids(obj_ids)
         self.ctx.out("OriginalFile:%s" % obj_ids)
