@@ -23,6 +23,8 @@ import re
 import mimetypes
 
 from omero.cli import BaseControl
+from omero.model import FileAnnotationI, OriginalFileI
+from omero.rtypes import rstring
 from .library import upload_ln_s
 
 try:
@@ -58,6 +60,12 @@ class UploadControl(BaseControl):
             "--data-dir", type=str,
             help="Path to the OMERO data directory. If passed will try to"
             "in-place upload into ManagedRepository")
+        parser.add_argument(
+            "--wrap", action="store_true",
+            help="Wrap the original file into a File Annotation")
+        parser.add_argument(
+            "--namespace", type=str,
+            help="Specifies the FileAnnotation namespace (requires --wrap)")
         parser.set_defaults(func=self.upload)
         parser.add_login_arguments()
 
@@ -80,8 +88,19 @@ class UploadControl(BaseControl):
             else:
                 obj = client.upload(local_file, type=omero_format)
                 obj_id = obj.id.val
-            obj_ids.append(obj_id)
+            if args.wrap:
+                fa = FileAnnotationI()
+                fa.setFile(OriginalFileI(obj_id, False))
+                if args.namespace:
+                    fa.setNs(rstring(args.namespace))
+                fa = client.sf.getUpdateService().saveAndReturnObject(fa)
+                obj_ids.append(fa.id.val)
+            else:
+                obj_ids.append(obj_id)
             self.ctx.set("last.upload.id", obj_id)
 
         obj_ids = self._order_and_range_ids(obj_ids)
-        self.ctx.out("OriginalFile:%s" % obj_ids)
+        if args.wrap:
+            self.ctx.out("FileAnnotation:%s" % obj_ids)
+        else:
+            self.ctx.out("OriginalFile:%s" % obj_ids)

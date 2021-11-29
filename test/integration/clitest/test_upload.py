@@ -64,6 +64,12 @@ class TestUpload(CLITest):
         else:
             assert not os.path.islink(omero_path)
 
+    def check_namespace(self, original_file, expected_ns):
+        args = self.login_args() + ["obj", "get", original_file]
+        self.cli.invoke(args + ["ns"], strict=True)
+        ns = self.cli.get("tx.state").get_row(0)
+        assert ns == expected_ns
+
     def test_upload_single_file(self, capfd):
         f = create_path(suffix=".txt")
         self.args += [str(f)]
@@ -109,3 +115,13 @@ class TestUpload(CLITest):
             self.check_file_path(out, True)
         else:
             self.check_file_path(out, False)
+
+    @pytest.mark.parametrize('ns', [None, 'foo'])
+    def test_file_annotation(self, capfd, ns):
+        f = create_path(suffix=".txt")
+        self.args += [str(f), "--wrap"]
+        if ns is not None:
+            self.args += ["--namespace", ns]
+        out = self.upload(capfd)
+        assert out.startswith("FileAnnotation:")
+        self.check_namespace(out, ns)
