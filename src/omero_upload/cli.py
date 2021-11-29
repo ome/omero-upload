@@ -51,6 +51,8 @@ class UploadControl(BaseControl):
 
     def _configure(self, parser):
         parser.add_argument("file", nargs="+")
+        parser.add_argument(
+            "-m", "--mimetype", help="Mimetype of the file")
         parser.set_defaults(func=self.upload)
         parser.add_login_arguments()
 
@@ -60,11 +62,13 @@ class UploadControl(BaseControl):
         for file in args.file:
             if not path(file).exists():
                 self.ctx.die(500, "File: %s does not exist" % file)
-        for file in args.file:
+        for local_file in args.file:
             omero_format = UNKNOWN
-            if(mimetypes.guess_type(file) != (None, None)):
+            if args.mimetype:
+                omero_format = args.mimetype
+            elif (mimetypes.guess_type(file) != (None, None)):
                 omero_format = mimetypes.guess_type(file)[0]
-            obj = client.upload(file, type=omero_format)
+            obj = client.upload(local_file, type=omero_format)
             obj_ids.append(obj.id.val)
             self.ctx.set("last.upload.id", obj.id.val)
 

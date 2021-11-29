@@ -81,3 +81,10 @@ class TestUpload(CLITest):
         out = self.upload(capfd)
         self.check_file_name(out, f)
         self.check_mimetype(out, "text/plain")
+
+    def test_mimetype_argument(self, capfd):
+        f = create_path(suffix=".txt")
+        self.args += [str(f), "--mimetype", "text/csv"]
+        out = self.upload(capfd)
+        self.check_file_name(out, f)
+        self.check_mimetype(out, "text/csv")
