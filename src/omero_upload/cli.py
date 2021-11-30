@@ -72,15 +72,15 @@ class UploadControl(BaseControl):
     def upload(self, args):
         client = self.ctx.conn(args)
         obj_ids = []
-        for file in args.file:
-            if not path(file).exists():
-                self.ctx.die(500, "File: %s does not exist" % file)
+        for local_file in args.file:
+            if not path(local_file).exists():
+                self.ctx.die(500, "File: %s does not exist" % local_file)
         for local_file in args.file:
             omero_format = UNKNOWN
             if args.mimetype:
                 omero_format = args.mimetype
-            elif (mimetypes.guess_type(file) != (None, None)):
-                omero_format = mimetypes.guess_type(file)[0]
+            elif (mimetypes.guess_type(local_file) != (None, None)):
+                omero_format = mimetypes.guess_type(local_file)[0]
             if args.data_dir:
                 obj = upload_ln_s(
                     client, local_file, args.data_dir, omero_format)
