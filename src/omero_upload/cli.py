@@ -58,7 +58,7 @@ class UploadControl(BaseControl):
             "-m", "--mimetype", help="Mimetype of the file")
         parser.add_argument(
             "--data-dir", type=str,
-            help="Path to the OMERO data directory. If passed will try to"
+            help="Path to the OMERO data directory. If passed will try to "
             "in-place upload into ManagedRepository")
         parser.add_argument(
             "--wrap", action="store_true",
