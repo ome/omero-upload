@@ -23,6 +23,9 @@ import re
 import mimetypes
 
 from omero.cli import BaseControl
+from omero.model import FileAnnotationI, OriginalFileI
+from omero.rtypes import rstring
+from .library import upload_ln_s
 
 try:
     from omero_ext.path import path
@@ -51,22 +54,53 @@ class UploadControl(BaseControl):
 
     def _configure(self, parser):
         parser.add_argument("file", nargs="+")
+        parser.add_argument(
+            "-m", "--mimetype", help="Mimetype of the file")
+        parser.add_argument(
+            "--data-dir", type=str,
+            help="Path to the OMERO data directory. If passed will try to "
+            "in-place upload into ManagedRepository")
+        parser.add_argument(
+            "--wrap", action="store_true",
+            help="Wrap the original file into a File Annotation")
+        parser.add_argument(
+            "--namespace", type=str,
+            help="Specifies the FileAnnotation namespace (requires --wrap)")
         parser.set_defaults(func=self.upload)
         parser.add_login_arguments()
 
     def upload(self, args):
         client = self.ctx.conn(args)
         obj_ids = []
-        for file in args.file:
-            if not path(file).exists():
-                self.ctx.die(500, "File: %s does not exist" % file)
-        for file in args.file:
+        for local_file in args.file:
+            if not path(local_file).exists():
+                self.ctx.die(500, "File: %s does not exist" % local_file)
+        for local_file in args.file:
             omero_format = UNKNOWN
-            if(mimetypes.guess_type(file) != (None, None)):
-                omero_format = mimetypes.guess_type(file)[0]
-            obj = client.upload(file, type=omero_format)
-            obj_ids.append(obj.id.val)
-            self.ctx.set("last.upload.id", obj.id.val)
+            if args.mimetype:
+                omero_format = args.mimetype
+            elif (mimetypes.guess_type(local_file) != (None, None)):
+                omero_format = mimetypes.guess_type(local_file)[0]
+            if args.data_dir:
+                obj = upload_ln_s(
+                    client, local_file, args.data_dir, omero_format)
+                obj_id = obj.id
+            else:
+                obj = client.upload(local_file, type=omero_format)
+                obj_id = obj.id.val
+            if args.wrap:
+                fa = FileAnnotationI()
+                fa.setFile(OriginalFileI(obj_id, False))
+                if args.namespace:
+                    fa.setNs(rstring(args.namespace))
+                fa = client.sf.getUpdateService().saveAndReturnObject(fa)
+                obj_ids.append(fa.id.val)
+            else:
+                obj_ids.append(obj_id)
+            self.ctx.set("last.upload.id", obj_id)
 
         obj_ids = self._order_and_range_ids(obj_ids)
-        self.ctx.out("OriginalFile:%s" % obj_ids)
+        if args.wrap:
+            self.ctx.out("FileAnnotation:%s" % obj_ids)
+        else:
+            self.ctx.out("OriginalFile:%s" % obj_ids)

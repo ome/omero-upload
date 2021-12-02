@@ -24,6 +24,46 @@ Install the command-line tool using `pip <https://pip.pypa.io/en/stable/>`_::
 
     $ pip install -U omero-upload
 
+Usage
+-----
+
+The plugin is called from the command-line using the `omero` command.
+
+To upload a single file::
+
+    $ omero upload <file>
+
+This command will create an `OriginalFile` on the server and return an output
+of type `OriginalFile:<id>`.
+
+To upload multiple files::
+
+    $ omero upload <file1> <file2>
+
+This command will create two `OriginalFile` and return an output of type `OriginalFile:<id1>,<id2>`
+
+By default, the mimetype will be guessed from the filename but it can be
+specified by using the `--mimetype` argument::
+
+    $ omero upload <file1> --mimetype 'test/csv'
+
+Files can be in-place uploaded into the OMERO.server via symlinked rather than
+being copied. This requires the command to be run on the OMERO.server itself
+from a user having write permissions to the OMERO data repository, similarly
+to the [in-place import](https://docs.openmicroscopy.org/omero/latest/sysadmins/in-place-import.html). To run an in-place upload, the `--data-dir` argument must be passed to
+specify the binary OMERO directory::
+
+    $ omero upload <file1> --data-dir /OMERO
+
+Instead of creating and returning a simple `OriginalFile` object, it is also possible to wrap the file within a `FileAnnotation` which can then be linked
+to other objects in the database. It is possible to specify the namespace of this `FileAnnotation` using the `--namespace` argument::
+
+
+    $ omero upload <file1> --wrap --namespace 'openmicroscopy.org/idr/analysis/original'
+
+This command will create an `OriginalFile` and a `FileAnnotation` and return
+an output of type `FileAnnotation:<id>`.
+
 Release process
 ---------------
 
