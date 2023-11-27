@@ -26,7 +26,7 @@ import pytest
 from omero.testlib.cli import CLITest
 from omero.cli import NonZeroReturnCode
 from omero.plugins.obj import ObjControl
-from omero.plugins.upload import UploadControl
+from omero_upload.cli import UploadControl
 from omero.util.temp_files import create_path
 from omero.util import long_to_path
 
