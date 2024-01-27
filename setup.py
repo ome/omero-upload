@@ -128,8 +128,7 @@ setup(
     keywords=['OMERO.CLI', 'plugin'],
     cmdclass={'test': PyTest},
     install_requires=[
-        'omero-py>=5.6.0',
-        'future'],
+        'omero-py>=5.6.0'],
     python_requires='>=3',
     tests_require=[
         'omero-py>=5.17.0',
