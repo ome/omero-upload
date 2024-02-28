@@ -25,13 +25,9 @@ import mimetypes
 from omero.cli import BaseControl
 from omero.model import FileAnnotationI, OriginalFileI
 from omero.rtypes import rstring
-from .library import upload_ln_s
+from omero_ext.path import path
 
-try:
-    from omero_ext.path import path
-except ImportError:
-    # Python 2
-    from path import path
+from .library import upload_ln_s
 
 
 HELP = """Upload local files to the OMERO server"""
